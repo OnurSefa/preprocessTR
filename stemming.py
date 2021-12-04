@@ -1,0 +1,95 @@
+import pyconll
+
+
+def prepare_data(file_path='tr_boun-ud-train.conllu'):
+    data = pyconll.load_from_file(file_path)
+    y_values = []
+    x_values = []
+
+    for sentence in data._sentences:
+        for token in sentence._tokens:
+            tag = token.upos
+            if tag == 'PUNCT':
+                continue
+            form = token.form
+            lemma = token.lemma
+
+            if form == None or lemma == None:
+                continue
+
+            y_values.append(lemma)
+            x_values.append(form)
+
+    return x_values, y_values
+
+
+def train(file_path='tr_boun-ud-train.conllu'):
+    x_values, y_values = prepare_data(file_path)
+
+    suffixes = []
+    for x, y in zip(x_values, y_values):
+        try:
+            y_length = len(y)
+            x_length = len(x)
+        except TypeError:
+            continue
+        if x_length <= y_length:
+            continue
+        suffix = x[y_length:x_length]
+        suffixes.append(suffix)
+
+    suffixes.sort(key=lambda a:len(a), reverse=True)
+
+    return suffixes
+
+
+def test(test_file_path='tr_boun-ud-test.conllu', train_file_path='tr_boun-ud-train.conllu'):
+    suffixes = train(train_file_path)
+    x_values, y_values = prepare_data(test_file_path)
+
+    x_count = len(x_values)
+    i = 0
+    found_x = []
+    while i < x_count:
+        x = x_values[i]
+        for suffix in suffixes:
+            s_length = len(suffix)
+            x_length = len(x)
+
+            if s_length > x_length - 3:
+                continue
+            last_part = x[x_length-s_length:]
+
+            if last_part == suffix:
+                x = x[:x_length-s_length]
+                break
+        i += 1
+        found_x.append(x)
+        if i % 1000 == 0:
+            print(i)
+
+    return found_x, y_values
+
+
+def evaluate(x_values, y_values):
+    total = 0
+    correct = 0
+    for x, y in zip(x_values, y_values):
+        if y == None:
+            print('a')
+            continue
+        if x == None:
+            print('b')
+            continue
+        total += 1
+        if x == y:
+            correct += 1
+
+    accuracy = correct/total
+    return accuracy
+
+
+if __name__ == '__main__':
+    x_result, y_result = test()
+    a = evaluate(x_result, y_result)
+    print('accuracy:', a)
