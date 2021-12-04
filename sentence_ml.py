@@ -117,8 +117,9 @@ def evaluate(result, y_value):
 if __name__ == '__main__':
 
     limits = [0.0000001, 0.0000005, 0.000001, 0.000005, 0.00001, 0.00005, 0.0001, 0.0005]
+    limits = [0.00001]
     for limit in limits:
-        r_result, y_result = test(limit=limit)
+        r_result, y_result = test(test_file_path="tr_boun-ud-test.conllu", limit=limit)
         p, r = evaluate(r_result, y_result)
 
         print('limit:', limit)
