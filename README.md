@@ -4,8 +4,8 @@
 ## Description
 
 This project under process. The aim is to handle preprocessing operations for 
-Turkish. It is based over Bogazici University NLP course assignment. It can be found
-in the docs directory of this repository. 
+Turkish. It is based over Bogazici University NLP course assignment. Assignment description can be found
+in the docs directory of this repository. Also, the progress report is in the docs directory. 
 
 ### Authors
 
