@@ -14,7 +14,7 @@ def prepare_data(file_path='tr_boun-ud-train.conllu'):
             form = token.form
             lemma = token.lemma
 
-            if form == None or lemma == None:
+            if form is None or lemma is None:
                 continue
 
             y_values.append(lemma)
