@@ -73,6 +73,44 @@ def train_strategy2(file_path='tr_boun-ud-train.conllu'):
     return suffixes1
 
 
+def train_strategy3(file_path='tr_boun-ud-train.conllu'):
+    x_values, y_values = prepare_data(file_path)
+
+    suffixes = []
+    for x, y in zip(x_values, y_values):
+        try:
+            y_length = len(y)
+            x_length = len(x)
+        except TypeError:
+            continue
+        if x_length <= y_length:
+            continue
+        suffix = x[y_length:x_length]
+        suffixes.append(suffix)
+
+    result = []
+    length = len(suffixes)
+    for index, s in enumerate(suffixes):
+        if len(s) == 0:
+            continue
+        for i in range(length):
+            if index == i:
+                continue
+            inspect = suffixes[i]
+            inspect_length = len(inspect)
+            s_length = len(s)
+            if inspect_length < s_length:
+                continue
+            last_part = inspect[inspect_length-s_length:]
+            if last_part == s:
+                suffixes[i] = inspect[:inspect_length-s_length]
+
+    for s in suffixes:
+        if len(s) > 0:
+            result.append(s)
+    return result
+
+
 def test(test_file_path='tr_boun-ud-test.conllu', train_file_path='tr_boun-ud-train.conllu'):
     suffixes = train(train_file_path)
     # suffixes = train_strategy2(train_file_path)
@@ -148,6 +186,43 @@ def test_strategy2(test_file_path='tr_boun-ud-test.conllu', train_file_path='tr_
     return found_x, y_values, compare
 
 
+def test_strategy3(test_file_path='tr_boun-ud-test.conllu', train_file_path='tr_boun-ud-train.conllu'):
+    suffixes = train_strategy3(train_file_path)
+    x_values, y_values = prepare_data(test_file_path)
+    x_values = x_values[:2000]
+    y_values = y_values[:2000]
+
+    x_count = len(x_values)
+    i = 0
+    found_x = []
+    while i < x_count:
+        cont = True
+        x = x_values[i]
+        for suffix in suffixes:
+            s_length = len(suffix)
+            x_length = len(x)
+
+            if s_length < 1:
+                continue
+
+            if s_length > x_length - 2:
+                continue
+            last_part = x[x_length-s_length:]
+
+            if last_part == suffix:
+                x = x[:x_length-s_length]
+                x_values[i] = x
+                cont = False
+                break
+        if cont:
+            i += 1
+            found_x.append(x)
+        if i % 200 == 0:
+            print(i)
+    compare = []
+    return found_x, y_values, compare
+
+
 def evaluate(x_values, y_values):
     total = 0
     correct = 0
@@ -167,7 +242,7 @@ def evaluate(x_values, y_values):
 
 
 if __name__ == '__main__':
-    x_result, y_result, compare = test_strategy2()
+    x_result, y_result, compare = test_strategy3()
     a = evaluate(x_result, y_result)
     print('accuracy:', a)
     print('a')
