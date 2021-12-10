@@ -75,47 +75,6 @@ def evaluate_tokenizer(data):
             total+=1
 
     return correct/total
-''' 
-def process_data(data):
-    x_data = []
-    for s in range(len(data.sentence_texts)):
-        x_data.append(list(data.sentence_texts[s]))
-        for t in range(len(data.token_list[s])):
-            for t
-
-    y_data = []
-
-
-    print(x_data)
-
-
-def log_reg_tokenizer(train_data, test_data):
-    x_train = "Buse geldi."
-    y_train = pd.get_dummies(["Buse", "geldi", "."])
-
-    x_test = test_data.sentence_texts
-    y_test = test_data.token_list
-
-    #print(x_test)
-
-
-    logisticRegr = LogisticRegression()
-
-
-    #training the classifier
-    logisticRegr.fit(x_train, y_train)
-    
-    #predict
-    y_pred = logisticRegr.predict(x_test)
-    print(y_pred)
-   
-
-    #score
-    score = logisticRegr.score(x_test, y_test)
-    print(score)
-'''
-
-
 
 train_data = data.Data("tr_boun-ud-train.conllu")
 test_data = data.Data("tr_boun-ud-test.conllu")
