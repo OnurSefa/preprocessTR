@@ -118,8 +118,8 @@ for s in range(len(index_list_1)):
 
 print(sent_list[0])
 print(predicted_tokens[0])
-print(sent_list[3])
-print(predicted_tokens[3])
+print(sent_list[56])
+print(predicted_tokens[56])
 
 
 correct_count = 0
@@ -131,10 +131,12 @@ for i in range(len(predicted_tokens)):
         if len(act_tokens) >= len(pred_tokens):
             for ind in range(len(pred_tokens)):
                 if pred_tokens[ind] == act_tokens[ind]:
+                    #print(pred_tokens[ind])
                     correct_count +=1
         else:
             for ind in range(len(act_tokens)):
                 if pred_tokens[ind] == act_tokens[ind]:
+                    #print(pred_tokens[ind])
                     correct_count +=1
 
 print(correct_count)
