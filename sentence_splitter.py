@@ -2,13 +2,35 @@ import pyconll
 
 
 def prepare_data(file_path='./tr_boun-ud-dev.conllu'):
-    dev = pyconll.load_from_file('./tr_boun-ud-dev.conllu')
+    dev = pyconll.load_from_file(file_path)
     y_value = ''
     x_value = ''
     for sentence in dev._sentences:
         x_value += sentence.text
         y_value += sentence.text
         y_value += chr(126)
+    y_value = y_value[:-1]
+
+    return x_value, y_value
+
+
+def prepare_data_corrected(file_path='./tr_boun-ud-dev.conllu'):
+    dev = pyconll.load_from_file(file_path)
+    y_value = ''
+    x_value = ''
+
+    accepted_last_char_list = ['!', '"', '#', '$', '%', '&', '\'', '(', ')', '*', '+', ',', '-', '.', '/', ':', ';', '<',
+                               '=', '>', '?', '@', '[', '\\', ']', '^', '_', '`', '{', '|', '}', '~']
+
+    minimized_list = ['!', '"', '\'', ')', '.', ':', '?']
+
+    for sentence in dev._sentences:
+        text = sentence.text
+        last_char = text[-1]
+        if last_char in minimized_list:
+            x_value += sentence.text
+            y_value += sentence.text
+            y_value += chr(126)
     y_value = y_value[:-1]
 
     return x_value, y_value
@@ -50,6 +72,50 @@ def sentence_splitter(x_data):
                     split = True
                 if value == 63:
                     split = True
+
+        y_hat += c
+        if split:
+            y_hat += chr(126)
+            split = False
+
+    return y_hat
+
+
+def sentence_splitter_corrected(x_data):
+
+    split = False
+    y_hat = ''
+    inside_quotation = False
+    inside_single_quotation = False
+    inside_parenthesis = False
+    length = len(x_data)
+    for i, c in enumerate(x_data):
+        value = ord(c)
+        if value == 34:
+            if inside_quotation:
+                inside_quotation = False
+            else:
+                inside_quotation = True
+        if value == 39:
+            if inside_single_quotation:
+                inside_single_quotation = False
+            else:
+                inside_single_quotation = True
+        if value == 40:
+            inside_parenthesis = True
+        if value == 41:
+            inside_parenthesis = False
+
+        if i < length - 1:
+            if value == 46:
+                if ord(x_data[i + 1]) == 46:
+                    split = False
+                else:
+                    split = True
+            if value == 33:
+                split = True
+            if value == 63:
+                split = True
 
         y_hat += c
         if split:
@@ -128,15 +194,14 @@ if __name__ == '__main__':
 
     x, y = prepare_data()
     y_hat = sentence_splitter(x)
-    """with open('y.txt', 'w', encoding='utf-8') as write_file:
-        y_write = y.split(chr(126))
-        for line in y_write:
-            write_file.write(line + '\n')
-    with open('y_hat.txt', 'w', encoding='utf-8') as found_file:
-        y_write = y_hat.split(chr(126))
-        for line in y_write:
-            found_file.write(line + '\n')"""
     p, r = evaluate(y, y_hat)
 
     print('precision:', p)
     print('recall:', r)
+
+    x, y = prepare_data_corrected()
+    y_hat = sentence_splitter_corrected(x)
+    p, r = evaluate(y, y_hat)
+
+    print('corrected precision:', p)
+    print('corrected recall:', r)
